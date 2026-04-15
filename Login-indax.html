@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GreenHorizon | Secure Registration with Bot Detection</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), 
+                  url('https://images.pexels.com/photos/957024/forest-trees-nature-wood-957024.jpeg?auto=compress&cs=tinysrgb&w=1600') no-repeat center center/cover;
+      background-attachment: fixed;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+
+    .form-container {
+      background: white;
+      max-width: 750px;
+      width: 100%;
+      padding: 35px 35px 40px;
+      border-radius: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      transition: transform 0.25s ease;
+    }
+
+    .form-container:hover {
+      transform: translateY(-3px);
+    }
+
+    .brand-icon {
+      width: 65px;
+      height: 65px;
+      background: #2e7d32;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      box-shadow: 0 8px 14px rgba(46, 125, 50, 0.25);
+    }
+    .brand-icon span {
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+    }
+
+    h2 {
+      font-size: 32px;
+      color: #1e4620;
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #4a6741;
+      font-size: 14px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid #d4e6d1;
+      display: inline-block;
+      padding-bottom: 8px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 5px;
+    }
+
+    .form-row .input-field {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .input-field {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .input-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e4620;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .input-field input, .input-field select, .input-field textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      border: 1.5px solid #c8e6c9;
+      border-radius: 14px;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.2s;
+      background: #fefef7;
+    }
+
+    .input-field textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .input-field input:focus, .input-field select:focus, .input-field textarea:focus {
+      border-color: #2e7d32;
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+      background: #ffffff;
+    }
+
+    .input-field input.error-input, .input-field select.error-input {
+      border-color: #d32f2f;
+      background-color: #fff5f5;
+    }
+
+    .error-message {
+      font-size: 11px;
+      color: #d32f2f;
+      margin-top: 5px;
+      margin-left: 5px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .field-hint {
+      font-size: 10px;
+      color: #6b8c5c;
+      margin-top: 4px;
+      margin-left: 5px;
+    }
+
+    /* CAPTCHA Styles */
+    .captcha-container {
+      background: #f1f8e9;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 15px 0 20px;
+      border: 1px solid #c8e6c9;
+    }
+
+    .captcha-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .captcha-code {
+      background: #2e3b2e;
+      color: #a5d6a5;
+      font-family: 'Courier New', monospace;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 8px;
+      padding: 12px 20px;
+      border-radius: 14px;
+      text-align: center;
+      user-select: none;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .captcha-input-group {
+      flex: 2;
+      min-width: 200px;
+    }
+
+    .captcha-input-group input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 1.5px solid #c8e6c9;
+      border-radius: 14px;
+      font-family: monospace;
+    }
+
+    .captcha-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .refresh-captcha {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 20px;
+      transition: background 0.2s;
+    }
+
+    .refresh-captcha:hover {
+      background: #1b5e20;
+    }
+
+    .captcha-status {
+      font-size: 11px;
+      margin-top: 12px;
+      color: #2e7d32;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bot-detection-badge {
+      background: #e8f5e9;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .checkbox-group {
+      margin: 15px 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #1e4620;
+    }
+
+    .checkbox-label input {
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+      accent-color: #2e7d32;
+    }
+
+    .login-btn {
+      background: #2e7d32;
+      color: white;
+      width: 100%;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 44px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      background: #1b5e20;
+      transform: scale(1.01);
+    }
+
+    .login-btn:disabled {
+      background: #9aa89a;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .demo-btn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .demo-btn:hover {
+      background: #2e7d32;
+    }
+
+    .toast-message {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e4620;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .toast-message.show-toast {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    hr {
+      margin: 20px 0 15px;
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, #e0f0df, #b9dcb3, #e0f0df);
+    }
+
+    .copyright {
+      text-align: center;
+      font-size: 10px;
+      color: #8a9a88;
+      margin-top: 20px;
+    }
+
+    .copyright a {
+      color: #2e7d32;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    @media (max-width: 650px) {
+      .form-container {
+        padding: 25px 20px 30px;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .captcha-box {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <div class="brand-icon">
+    <span>🌿</span>
+  </div>
+  <h2>Secure Registration</h2>
+  <div class="subtitle">Bot protection enabled | Complete all fields</div>
+
+  <form id="registerForm">
+    <!-- Row 1: Full Name + Age -->
+    <div class="form-row">
+      <div class="input-field">
+        <label>Full Name *</label>
+        <input type="text" id="fullName" placeholder="John Doe" autocomplete="name">
+        <div class="error-message" id="nameError">Full name is required</div>
+      </div>
+      <div class="input-field">
+        <label>Age *</label>
+        <input type="number" id="age" placeholder="18-100" min="1" max="120">
+        <div class="error-message" id="ageError">Age must be between 1 and 120</div>
+      </div>
+    </div>
+
+    <!-- Row 2: Date of Birth + Gender -->
+    <div class="form-row">
+      <div class="input-field">
+        <label>Date of Birth *</label>
+        <input type="date" id="dob">
+        <div class="error-message" id="dobError">Please select your date of birth</div>
+      </div>
+      <div class="input-field">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 3: Email + Phone -->
+    <div class="form-row">
+      <div class="input-field">
+        <label>Email Address *</label>
+        <input type="email" id="email" placeholder="example@domain.com">
+        <div class="error-message" id="emailError">Valid email required</div>
+      </div>
+      <div class="input-field">
+        <label>Phone Number</label>
+        <input type="tel" id="phone" placeholder="+1234567890">
+      </div>
+    </div>
+
+    <!-- Row 4: Occupation + Company -->
+    <div class="form-row">
+      <div class="input-field">
+        <label>Occupation *</label>
+        <select id="occupation">
+          <option value="">Select occupation</option>
+          <option>Software Developer</option>
+          <option>Designer</option>
+          <option>Student</option>
+          <option>Business Owner</option>
+          <option>Healthcare</option>
+          <option>Education</option>
+          <option>Other</option>
+        </select>
+        <div class="error-message" id="occError">Please select occupation</div>
+      </div>
+      <div class="input-field">
+        <label>Company / Institution</label>
+        <input type="text" id="company" placeholder="Optional">
+      </div>
+    </div>
+
+    <!-- Row 5: Address -->
+    <div class="form-row">
+      <div class="input-field">
+        <label>Street Address *</label>
+        <input type="text" id="street" placeholder="123 Main St">
+        <div class="error-message" id="streetError">Street address required</div>
+      </div>
+      <div class="input-field">
+        <label>City *</label>
+        <input type="text" id="city" placeholder="New York">
+        <div class="error-message" id="cityError">City required</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="input-field">
+        <label>State / Province</label>
+        <input type="text" id="state" placeholder="e.g., California">
+      </div>
+      <div class="input-field">
+        <label>Zip / Postal Code *</label>
+        <input type="text" id="zip" placeholder="10001">
+        <div class="error-message" id="zipError">Zip code required</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="input-field">
+        <label>Country *</label>
+        <select id="country">
+          <option value="">Select country</option>
+          <option>United States</option>
+          <option>Canada</option>
+          <option>United Kingdom</option>
+          <option>Australia</option>
+          <option>India</option>
+          <option>Germany</option>
+          <option>Other</option>
+        </select>
+        <div class="error-message" id="countryError">Country required</div>
+      </div>
+      <div class="input-field">
+        <label>Annual Income (USD)</label>
+        <select id="income">
+          <option value="">Select range</option>
+          <option>Under $25k</option>
+          <option>$25k - $50k</option>
+          <option>$50k - $75k</option>
+          <option>$75k - $100k</option>
+          <option>$100k - $150k</option>
+          <option>$150k+</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-field">
+      <label>Short Bio / About You</label>
+      <textarea id="bio" placeholder="Tell us about yourself... (optional)"></textarea>
+    </div>
+
+    <!-- Password Fields -->
+    <div class="form-row">
+      <div class="input-field">
+        <label>Create Password *</label>
+        <input type="password" id="password" placeholder="Minimum 6 characters">
+        <div class="error-message" id="pwdError">Password must be at least 6 characters</div>
+      </div>
+      <div class="input-field">
+        <label>Confirm Password *</label>
+        <input type="password" id="confirmPwd" placeholder="Re-enter password">
+        <div class="error-message" id="confirmError">Passwords do not match</div>
+      </div>
+    </div>
+
+    <!-- AUTO BOT CATCHING SYSTEM - CAPTCHA -->
+    <div class="captcha-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+        <label style="font-weight: 700; color: #1e4620;">🤖 Bot Detection System</label>
+        <span class="bot-detection-badge">🛡️ Anti-Bot Active</span>
+      </div>
+      <div class="captcha-box">
+        <div class="captcha-code" id="captchaCode">ABCD12</div>
+        <div class="captcha-input-group">
+          <input type="text" id="captchaInput" placeholder="Enter the code above" autocomplete="off">
+          <div class="error-message" id="captchaError">Invalid verification code</div>
+        </div>
+        <div class="captcha-actions">
+          <button type="button" id="refreshCaptcha" class="refresh-captcha" title="New Code">🔄</button>
+        </div>
+      </div>
+      <div class="captcha-status" id="captchaStatus">
+        <span>🔐</span> Human verification required
+      </div>
+    </div>
+
+    <!-- Terms & Newsletter -->
+    <div class="checkbox-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="termsCheck"> I agree to the Terms & Conditions *
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="newsCheck"> Subscribe to newsletter
+      </label>
+    </div>
+    <div class="error-message" id="termsError" style="margin-top: -10px; margin-bottom: 10px;">You must accept Terms</div>
+
+    <button type="submit" class="login-btn" id="submitBtn">Register Account</button>
+    <button type="button" id="fillDemoBtn" class="demo-btn">📋 Fill Demo Data</button>
+
+    <hr />
+    <div class="copyright">
+      © 2025 <a href="#" id="copyrightLink">MD-ZABIR2611</a> | Anti-Bot Registration System
+    </div>
+  </form>
+</div>
+
+<div id="toastMsg" class="toast-message">Registration successful!</div>
+
+<script>
+  (function() {
+    // DOM elements
+    const fullName = document.getElementById('fullName');
+    const age = document.getElementById('age');
+    const dob = document.getElementById('dob');
+    const email = document.getElementById('email');
+    const occupation = document.getElementById('occupation');
+    const street = document.getElementById('street');
+    const city = document.getElementById('city');
+    const zip = document.getElementById('zip');
+    const country = document.getElementById('country');
+    const password = document.getElementById('password');
+    const confirmPwd = document.getElementById('confirmPwd');
+    const termsCheck = document.getElementById('termsCheck');
+    const captchaInput = document.getElementById('captchaInput');
+    const captchaCodeSpan = document.getElementById('captchaCode');
+    const refreshBtn = document.getElementById('refreshCaptcha');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Error elements
+    const nameErr = document.getElementById('nameError');
+    const ageErr = document.getElementById('ageError');
+    const dobErr = document.getElementById('dobError');
+    const emailErr = document.getElementById('emailError');
+    const occErr = document.getElementById('occError');
+    const streetErr = document.getElementById('streetError');
+    const cityErr = document.getElementById('cityError');
+    const zipErr = document.getElementById('zipError');
+    const countryErr = document.getElementById('countryError');
+    const pwdErr = document.getElementById('pwdError');
+    const confirmErr = document.getElementById('confirmError');
+    const termsErr = document.getElementById('termsError');
+    const captchaErr = document.getElementById('captchaError');
+
+    const toastMsg = document.getElementById('toastMsg');
+    let currentCaptcha = '';
+
+    // Generate random CAPTCHA (6 characters alphanumeric)
+    function generateCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+      let captcha = '';
+      for (let i = 0; i < 6; i++) {
+        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      currentCaptcha = captcha;
+      captchaCodeSpan.textContent = currentCaptcha;
+      captchaInput.value = '';
+      document.getElementById('captchaStatus').innerHTML = '<span>🔄</span> New code generated | Enter exactly as shown';
+      captchaErr.classList.remove('show');
+      return captcha;
+    }
+
+    // Validate CAPTCHA
+    function validateCaptcha() {
+      const userInput = captchaInput.value.trim();
+      if (userInput !== currentCaptcha) {
+        captchaErr.classList.add('show');
+        return false;
+      }
+      captchaErr.classList.remove('show');
+      return true;
+    }
+
+    function showToast(message, isError = false) {
+      toastMsg.textContent = message;
+      toastMsg.style.background = isError ? '#c62828' : '#1e4620';
+      toastMsg.classList.add('show-toast');
+      setTimeout(() => toastMsg.classList.remove('show-toast'), 3000);
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.error-input').forEach(el => el.classList.remove('error-input'));
+      document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+    }
+
+    function validateEmail(emailVal) {
+      return /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(emailVal);
+    }
+
+    function validateForm() {
+      let isValid = true;
+      clearErrors();
+
+      if (!fullName.value.trim()) { fullName.classList.add('error-input'); nameErr.classList.add('show'); isValid = false; }
+      
+      const ageVal = parseInt(age.value);
+      if (!age.value || isNaN(ageVal) || ageVal < 1 || ageVal > 120) { age.classList.add('error-input'); ageErr.classList.add('show'); isValid = false; }
+      
+      if (!dob.value) { dob.classList.add('error-input'); dobErr.classList.add('show'); isValid = false; }
+      
+      if (!email.value.trim() || !validateEmail(email.value.trim())) { email.classList.add('error-input'); emailErr.classList.add('show'); isValid = false; }
+      
+      if (!occupation.value) { occupation.classList.add('error-input'); occErr.classList.add('show'); isValid = false; }
+      
+      if (!street.value.trim()) { street.classList.add('error-input'); streetErr.classList.add('show'); isValid = false; }
+      
+      if (!city.value.trim()) { city.classList.add('error-input'); cityErr.classList.add('show'); isValid = false; }
+      
+      if (!zip.value.trim()) { zip.classList.add('error-input'); zipErr.classList.add('show'); isValid = false; }
+      
+      if (!country.value) { country.classList.add('error-input'); countryErr.classList.add('show'); isValid = false; }
+      
+      const pwd = password.value.trim();
+      if (pwd.length < 6) { password.classList.add('error-input'); pwdErr.classList.add('show'); isValid = false; }
+      
+      if (confirmPwd.value.trim() !== pwd) { confirmPwd.classList.add('error-input'); confirmErr.classList.add('show'); isValid = false; }
+      
+      if (!termsCheck.checked) { termsErr.classList.add('show'); isValid = false; }
+      
+      // CAPTCHA validation - BOT CATCHING SYSTEM
+      if (!validateCaptcha()) { isValid = false; }
+      
+      return isValid;
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        const userData = {
+          name: fullName.value.trim(),
+          age: age.value,
+          dob: dob.value,
+          email: email.value.trim(),
+          occupation: occupation.value,
+          address: `${street.value.trim()}, ${city.value.trim()}`,
+          country: country.value,
+          botVerified: true,
+          timestamp: new Date().toISOString()
+        };
+        console.log('✅ HUMAN VERIFIED - Registration Data:', userData);
+        showToast(`✅ Welcome ${userData.name}! Human verification passed. Registration complete.`, false);
+        // Reset CAPTCHA after successful submission
+        generateCaptcha();
+        // Optional: clear sensitive fields
+        // password.value = ''; confirmPwd.value = '';
+      } else {
+        showToast('❌ Please fix errors and complete CAPTCHA verification', true);
+        // Auto refresh captcha if failed too many times? just regenerate for better UX
+        if (captchaErr.classList.contains('show')) {
+          generateCaptcha();
+        }
+      }
+    }
+
+    // Fill demo data (without bypassing CAPTCHA - user still must enter captcha)
+    function fillDemoData() {
+      fullName.value = 'John Greenfield';
+      age.value = '28';
+      dob.value = '1996-05-15';
+      document.getElementById('gender').value = 'Male';
+      email.value = 'john@greenhorizon.com';
+      document.getElementById('phone').value = '+1 (555) 123-4567';
+      occupation.value = 'Software Developer';
+      document.getElementById('company').value = 'EcoTech Solutions';
+      street.value = '456 Forest Avenue';
+      city.value = 'Portland';
+      document.getElementById('state').value = 'Oregon';
+      zip.value = '97201';
+      country.value = 'United States';
+      document.getElementById('income').value = '$75k - $100k';
+      document.getElementById('bio').value = 'Passionate about green technology and sustainable living.';
+      password.value = 'demo123';
+      confirmPwd.value = 'demo123';
+      termsCheck.checked = true;
+      clearErrors();
+      showToast('✨ Demo data filled! Please enter the CAPTCHA code to submit.', false);
+    }
+
+    // Real-time validations
+    const allRequired = [fullName, age, dob, email, occupation, street, city, zip, country, password, confirmPwd];
+    allRequired.forEach(field => {
+      if (field) field.addEventListener('blur', () => validateForm());
+    });
+    
+    termsCheck.addEventListener('change', () => {
+      if (termsCheck.checked) termsErr.classList.remove('show');
+      else termsErr.classList.add('show');
+    });
+    
+    password.addEventListener('input', () => {
+      if (confirmPwd.value.trim() && confirmPwd.value.trim() !== password.value.trim()) {
+        confirmPwd.classList.add('error-input');
+        confirmErr.classList.add('show');
+      } else {
+        confirmPwd.classList.remove('error-input');
+        confirmErr.classList.remove('show');
+      }
+    });
+    
+    confirmPwd.addEventListener('input', () => {
+      if (confirmPwd.value.trim() !== password.value.trim()) {
+        confirmPwd.classList.add('error-input');
+        confirmErr.classList.add('show');
+      } else {
+        confirmPwd.classList.remove('error-input');
+        confirmErr.classList.remove('show');
+      }
+    });
+
+    // CAPTCHA real-time check on input
+    captchaInput.addEventListener('input', function() {
+      if (captchaInput.value.trim() === currentCaptcha) {
+        captchaErr.classList.remove('show');
+        document.getElementById('captchaStatus').innerHTML = '<span>✅</span> Verification successful!';
+      } else {
+        if (captchaInput.value.length > 0) {
+          captchaErr.classList.add('show');
+          document.getElementById('captchaStatus').innerHTML = '<span>⚠️</span> Code mismatch - try again';
+        } else {
+          document.getElementById('captchaStatus').innerHTML = '<span>🔐</span> Enter the code above';
+        }
+      }
+    });
+
+    refreshBtn.addEventListener('click', () => {
+      generateCaptcha();
+      showToast('🔄 New CAPTCHA generated', false);
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', handleSubmit);
+    document.getElementById('fillDemoBtn').addEventListener('click', fillDemoData);
+    document.getElementById('copyrightLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('© 2025 MD-ZABIR2611 | Advanced Bot Detection System', false);
+    });
+
+    // Initialize CAPTCHA on page load
+    generateCaptcha();
+  })();
+</script>
+</body>
+</html>
